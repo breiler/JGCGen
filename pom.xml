@@ -6,6 +6,14 @@
     <version>1.0-SNAPSHOT</version>
     <artifactId>jgcgen</artifactId>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/breiler/JGCGen</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
