@@ -16,6 +16,8 @@
  */
 package org.luolamies.jgcgen.path;
 
+import org.luolamies.jgcgen.math.MathTools;
+
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -26,11 +28,12 @@ import java.util.Map;
  * calculated when the g-code is executed and therefore cannot be easily
  * manipulated in the preprocessor.
  *
+ * @author Calle Laakkonen
  */
 public final class SymbolicCoordinate extends Coordinate {
 	private EnumMap<Axis, String> axes;
-	
-	SymbolicCoordinate(EnumMap<Axis,String> axes) {
+
+    SymbolicCoordinate(EnumMap<Axis,String> axes) {
 		this.axes = axes;
 	}
 	
@@ -137,7 +140,7 @@ public final class SymbolicCoordinate extends Coordinate {
 	}
 
 	protected SymbolicCoordinate scaleNumeric(double scale) {
-		return scaleSymbolic(String.format("%.3f", scale));
+		return scaleSymbolic(MathTools.format(scale));
 	}
 
 	protected SymbolicCoordinate scaleSymbolic(String scale) {

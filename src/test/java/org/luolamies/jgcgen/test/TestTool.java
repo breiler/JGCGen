@@ -5,6 +5,9 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.luolamies.jgcgen.tools.Ballnose;
 
+/**
+ * @author Calle Laakkonen
+ */
 public class TestTool {
 	/**
 	 * The optimized version is less accurate. Make sure it stays within some tolerances.

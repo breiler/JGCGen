@@ -24,6 +24,9 @@ import org.luolamies.jgcgen.path.SymbolicCoordinate;
 
 import static org.junit.Assert.*;
 
+/**
+ * @author Calle Laakkonen
+ */
 public class CoordinateTests {
 
 	@Test public void TestNumeric() {
@@ -32,11 +35,11 @@ public class CoordinateTests {
 		test.set(Axis.X, 10.0);
 		test.set("Y", 5.0);
 		
-		assertEquals(10.0, test.getValue(Axis.X), 0);
-		assertEquals(5.0, test.getValue(Axis.Y), 0);
+		assertEquals(10d, test.getValue(Axis.X), 0);
+		assertEquals(5d, test.getValue(Axis.Y), 0);
 		assertNull(test.get(Axis.Z));
 		
-		assertEquals("X10.000 Y5.000", test.toGcode());
+		assertEquals("X10 Y5", test.toGcode());
 	}
 	
 	@Test public void testSymbolic() {
@@ -98,8 +101,8 @@ public class CoordinateTests {
 		c2.set(Axis.Y, "#<_safe>");
 		
 		SymbolicCoordinate c3 = (SymbolicCoordinate)c1.offset(c2);
-		assertEquals("[10.000+#1]", c3.get(Axis.X));
-		assertEquals("[5.000+#<_safe>]", c3.get(Axis.Y));
+		assertEquals("[10+#1]", c3.get(Axis.X));
+		assertEquals("[5+#<_safe>]", c3.get(Axis.Y));
 		assertNull(c3.get(Axis.Z));
 	}
 	
@@ -125,18 +128,18 @@ public class CoordinateTests {
 	@Test public void testSymbolicScale() {
 		SymbolicCoordinate c1 = new SymbolicCoordinate("2", "3", "4");
 		SymbolicCoordinate t1 = (SymbolicCoordinate) c1.scale(2.0);
-		assertEquals("[[2]*2.000]", t1.get(Axis.X));
-		assertEquals("[[3]*2.000]", t1.get(Axis.Y));
-		assertEquals("[[4]*2.000]", t1.get(Axis.Z));
+		assertEquals("[[2]*2]", t1.get(Axis.X));
+		assertEquals("[[3]*2]", t1.get(Axis.Y));
+		assertEquals("[[4]*2]", t1.get(Axis.Z));
 		
 		SymbolicCoordinate t2 = (SymbolicCoordinate) c1.scale("0.5");
-		assertEquals("[[2]*0.500]", t2.get(Axis.X));
-		assertEquals("[[3]*0.500]", t2.get(Axis.Y));
-		assertEquals("[[4]*0.500]", t2.get(Axis.Z));
+		assertEquals("[[2]*0.5]", t2.get(Axis.X));
+		assertEquals("[[3]*0.5]", t2.get(Axis.Y));
+		assertEquals("[[4]*0.5]", t2.get(Axis.Z));
 		
 		SymbolicCoordinate t3 = (SymbolicCoordinate) c1.scale("x2y3");
-		assertEquals("[[2]*2.000]", t3.get(Axis.X));
-		assertEquals("[[3]*3.000]", t3.get(Axis.Y));
+		assertEquals("[[2]*2]", t3.get(Axis.X));
+		assertEquals("[[3]*3]", t3.get(Axis.Y));
 		assertEquals("4", t3.get(Axis.Z));
 		
 		SymbolicCoordinate t4 = (SymbolicCoordinate) c1.scale("x#1y#2");
@@ -155,14 +158,14 @@ public class CoordinateTests {
 		SymbolicCoordinate c2 = new SymbolicCoordinate("#2", "#3", "#4");
 		
 		Coordinate t1 = c1.scale("#1");
-		assertEquals("[[2.000]*#1]", t1.get(Axis.X));
-		assertEquals("[[3.000]*#1]", t1.get(Axis.Y));
-		assertEquals("[[4.000]*#1]", t1.get(Axis.Z));
+		assertEquals("[[2]*#1]", t1.get(Axis.X));
+		assertEquals("[[3]*#1]", t1.get(Axis.Y));
+		assertEquals("[[4]*#1]", t1.get(Axis.Z));
 		
 		Coordinate t2 = c1.scale(c2.toGcode());
-		assertEquals("[[2.000]*#2]", t2.get(Axis.X));
-		assertEquals("[[3.000]*#3]", t2.get(Axis.Y));
-		assertEquals("[[4.000]*#4]", t2.get(Axis.Z));
+		assertEquals("[[2]*#2]", t2.get(Axis.X));
+		assertEquals("[[3]*#3]", t2.get(Axis.Y));
+		assertEquals("[[4]*#4]", t2.get(Axis.Z));
 	}
 	
 	@Test public void testParse() {

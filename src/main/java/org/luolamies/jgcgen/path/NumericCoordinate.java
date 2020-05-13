@@ -16,6 +16,8 @@
  */
 package org.luolamies.jgcgen.path;
 
+import org.luolamies.jgcgen.math.MathTools;
+
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ import java.util.Map;
  * Numeric coordinates.
  * <p>A numeric coordinates value is known at "compile time"
  *
+ * @author Calle Laakkonen
  */
 public final class NumericCoordinate extends Coordinate {
 	private final EnumMap<Axis, Double> axes;
@@ -121,7 +124,7 @@ public final class NumericCoordinate extends Coordinate {
 		// normalize
 		if(Math.abs(d) < 0.001)
 			d = 0.0;
-		return String.format("%.3f", d);
+		return MathTools.format(d);
 	}
 	
 	public boolean isDefined(Axis a) {

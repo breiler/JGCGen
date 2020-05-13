@@ -7,6 +7,9 @@ import org.luolamies.jgcgen.math.Range;
 
 import static org.junit.Assert.*;
 
+/**
+ * @author Calle Laakkonen
+ */
 public class TestMathRange {	
 	@Test public void TestPositiveRange() {
 		Range range = new Range(0, 10, 0.5);
@@ -14,7 +17,7 @@ public class TestMathRange {
 		for(Iterator<Double> i = range.iterator();i.hasNext();++pos) {
 			Double d = i.next();
 			assertEquals(pos/2.0, d, 0.001);
-			if(pos==19)
+			if(pos==20)
 				assertFalse(i.hasNext());
 		}
 	}
@@ -25,7 +28,7 @@ public class TestMathRange {
 		for(Iterator<Double> i = range.iterator();i.hasNext();--pos) {
 			Double d = i.next();
 			assertEquals(pos, d, 0);
-			if(pos==1)
+			if(pos==0)
 				assertFalse(i.hasNext());
 		}
 	}

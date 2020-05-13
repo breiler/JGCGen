@@ -56,6 +56,7 @@ import org.luolamies.jgcgen.text.Fonts;
 /**
  * The main class for the Java GCode Generator command line tool.
  *
+ * @author Calle Laakkonen
  */
 public class JGCGenerator {
 
@@ -66,149 +67,153 @@ public class JGCGenerator {
 	}
 	
 	public static void main(String[] args) {
+        JGCGenerator jgcGenerator = new JGCGenerator();
+        jgcGenerator.execute(args);
+    }
 
-		Map<String,String> vars = new HashMap<String,String>();
-		
-		// Default flags
-		boolean split = false;
-		
-		// Output file name
-		String outputfile=null;
-		
-		// Parse command line arguments
-		Options opts = new Options();
-	
-		opts.addOption("h", false, "Show this help text");
-		opts.addOption("s", false, "Split output");
-		opts.addOption("o", true, "Output filename");
-		opts.addOption("v", false, "Verbose error messages");
-		opts.addOption("D", true, "Define variable (var=value)");
-		
-		CommandLineParser parser = new GnuParser();
-		CommandLine cmd;
-		try {
-			cmd = parser.parse(opts, args);
-		} catch (ParseException e) {
-			System.err.println("Error parsing command line: " + e.getMessage());
-			return;
-		}
-		
-		if(cmd.hasOption('h') || cmd.getArgs().length==0) {
-			HelpFormatter fmt = new HelpFormatter();
-			fmt.printHelp("jcgen [options] [input file]", opts);
-			return;
-		}
-		
-		if(cmd.hasOption('o')) {
-			outputfile = cmd.getOptionValue('o');
-		}
-		
-		String[] vardefs = cmd.getOptionValues('D');
-		if(vardefs!=null) {
-			for(String var : vardefs) {
-				int eq = var.indexOf('=');
-				if(eq<0) {
-					System.err.println(var + ": Variable value missing!");
-					System.exit(1);
-				}
-				vars.put(var.substring(0, eq).trim(), var.substring(eq+1).trim());
-			}
-		}
-		
-		if(cmd.hasOption('s'))
-			split = true;
-				
-		logger = new Logger(cmd.hasOption('v'));
-		
-		// Select input source
-		String inputfile;
-		
-		if(cmd.getArgs()[0].equals("-")) {
-			// The default output for STDIN is STDOUT
-			if(outputfile==null) {
-				if(split) {
-					logger.fatal("Cannot split output when printing to stdout! Use -o to define an output file.", null);
-				}
-				outputfile = "-";
-			}
-						
-			inputfile = "STDIN";
-			
-			StringWriter str = new StringWriter();
-			
-			char[] buffer = new char[2048];
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-			int len;
-			try {
-				while((len=reader.read(buffer))>0) {
-					str.write(buffer, 0, len);
-				}
-			} catch(IOException e) {
-				logger.fatal("Error while reading from STDIN: " + e.getMessage(), e);
-			}
-			
-			StringResourceRepository repo = new StringResourceRepositoryImpl();
-			repo.putStringResource("STDIN", str.toString());
-			StringResourceLoader.setRepository(StringResourceLoader.REPOSITORY_NAME_DEFAULT, repo);			
-		} else {
-			// Read from file
-			File in = new File(cmd.getArgs()[0]);
-			if(in.canRead()==false) {
-				logger.fatal(in.getAbsolutePath() + ": Cannot read!", null);
-			}
-			Files.setWorkdir(in.getAbsoluteFile().getParentFile());
-			
-			inputfile = in.getName();
-			
-			// If no output file is specified, the default is the input file with the extension
-			// replaced with "ngc"
-			// If the file has no extension or the extension is already ngc, output must be
-			// specified manually.
-			if(outputfile==null) {
-				int dot = inputfile.lastIndexOf('.');
-				if(dot<0 || !inputfile.substring(dot+1).equals("ngc"))
-					outputfile = inputfile.substring(0,dot+1) + "ngc";
-				else {
-					logger.fatal("File already has the suffix \".ngc\". Select output file with -o\n", null);
-				}
-			} else if(outputfile.equals("-") && split) {
-				logger.fatal("-o - and -s cannot be used at the same time!", null);
-			}
-		}
-		
-		// Initialize Velocity
-		Velocity.setProperty("input.encoding", System.getProperty("file.encoding"));
-		Velocity.setProperty("output.encoding", System.getProperty("file.encoding"));
-		Velocity.setProperty("file.resource.loader.path", Files.getWorkdir().getAbsolutePath());
-		Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, logger);
-		
-		Properties props = new Properties();
-		try {
-			props.load(props.getClass().getResourceAsStream("/config/velocity.properties"));
-		} catch (IOException e) {
-			logger.fatal("Unable to load internal properties file! Error: " + e.getMessage(), e);
-			return;
-		}
+    private void execute(String[] args) {
+        Map<String,String> vars = new HashMap<String,String>();
 
-		Velocity.init(props);
-		
-		Template template;
-		
-		try {
-			template = Velocity.getTemplate(inputfile);
-		} catch(ParseErrorException e) {
-			logger.fatal("Parse error: " + e.getMessage(), e);
-			return;
-		}  catch(ResourceNotFoundException e) {
-			logger.fatal("Resource not found: " + e.getMessage(), null);
-			return;
-		}
-		
-		if(renderTemplate(inputfile, outputfile, template, split, vars)==false)
-			System.exit(1);
-	}
-	
-	/**
+        // Default flags
+        boolean split = false;
+
+        // Output file name
+        String outputfile=null;
+
+        // Parse command line arguments
+        Options opts = new Options();
+
+        opts.addOption("h", false, "Show this help text");
+        opts.addOption("s", false, "Split output");
+        opts.addOption("o", true, "Output filename");
+        opts.addOption("v", false, "Verbose error messages");
+        opts.addOption("D", true, "Define variable (var=value)");
+
+        CommandLineParser parser = new GnuParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(opts, args);
+        } catch (ParseException e) {
+            System.err.println("Error parsing command line: " + e.getMessage());
+            return;
+        }
+
+        if(cmd.hasOption('h') || cmd.getArgs().length==0) {
+            HelpFormatter fmt = new HelpFormatter();
+            fmt.printHelp("jcgen [options] [input file]", opts);
+            return;
+        }
+
+        if(cmd.hasOption('o')) {
+            outputfile = cmd.getOptionValue('o');
+        }
+
+        String[] vardefs = cmd.getOptionValues('D');
+        if(vardefs!=null) {
+            for(String var : vardefs) {
+                int eq = var.indexOf('=');
+                if(eq<0) {
+                    System.err.println(var + ": Variable value missing!");
+                    System.exit(1);
+                }
+                vars.put(var.substring(0, eq).trim(), var.substring(eq+1).trim());
+            }
+        }
+
+        if(cmd.hasOption('s'))
+            split = true;
+
+        logger = new Logger(cmd.hasOption('v'));
+
+        // Select input source
+        String inputfile;
+
+        if(cmd.getArgs()[0].equals("-")) {
+            // The default output for STDIN is STDOUT
+            if(outputfile==null) {
+                if(split) {
+                    logger.fatal("Cannot split output when printing to stdout! Use -o to define an output file.", null);
+                }
+                outputfile = "-";
+            }
+
+            inputfile = "STDIN";
+
+            StringWriter str = new StringWriter();
+
+            char[] buffer = new char[2048];
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            int len;
+            try {
+                while((len=reader.read(buffer))>0) {
+                    str.write(buffer, 0, len);
+                }
+            } catch(IOException e) {
+                logger.fatal("Error while reading from STDIN: " + e.getMessage(), e);
+            }
+
+            StringResourceRepository repo = new StringResourceRepositoryImpl();
+            repo.putStringResource("STDIN", str.toString());
+            StringResourceLoader.setRepository(StringResourceLoader.REPOSITORY_NAME_DEFAULT, repo);
+        } else {
+            // Read from file
+            File in = new File(cmd.getArgs()[0]);
+            if(in.canRead()==false) {
+                logger.fatal(in.getAbsolutePath() + ": Cannot read!", null);
+            }
+            Files.setWorkdir(in.getAbsoluteFile().getParentFile());
+
+            inputfile = in.getName();
+
+            // If no output file is specified, the default is the input file with the extension
+            // replaced with "ngc"
+            // If the file has no extension or the extension is already ngc, output must be
+            // specified manually.
+            if(outputfile==null) {
+                int dot = inputfile.lastIndexOf('.');
+                if(dot<0 || !inputfile.substring(dot+1).equals("ngc"))
+                    outputfile = inputfile.substring(0,dot+1) + "ngc";
+                else {
+                    logger.fatal("File already has the suffix \".ngc\". Select output file with -o\n", null);
+                }
+            } else if(outputfile.equals("-") && split) {
+                logger.fatal("-o - and -s cannot be used at the same time!", null);
+            }
+        }
+
+        // Initialize Velocity
+        Velocity.setProperty("input.encoding", System.getProperty("file.encoding"));
+        Velocity.setProperty("output.encoding", System.getProperty("file.encoding"));
+        Velocity.setProperty("file.resource.loader.path", Files.getWorkdir().getAbsolutePath());
+        Velocity.setProperty(Velocity.RUNTIME_LOG_LOGSYSTEM, logger);
+
+        Properties props = new Properties();
+        try {
+            props.load(getClass().getResourceAsStream("/config/velocity.properties"));
+        } catch (IOException e) {
+            logger.fatal("Unable to load internal properties file! Error: " + e.getMessage(), e);
+            return;
+        }
+
+        Velocity.init(props);
+
+        Template template;
+
+        try {
+            template = Velocity.getTemplate(inputfile);
+        } catch(ParseErrorException e) {
+            logger.fatal("Parse error: " + e.getMessage(), e);
+            return;
+        }  catch(ResourceNotFoundException e) {
+            logger.fatal("Resource not found: " + e.getMessage(), null);
+            return;
+        }
+
+        if(renderTemplate(inputfile, outputfile, template, split, vars)==false)
+            System.exit(1);
+    }
+
+    /**
 	 * Render the template.
 	 * @param input name of the input file
 	 * @param out output

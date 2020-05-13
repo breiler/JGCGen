@@ -11,14 +11,14 @@ import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.parser.node.Node;
 import org.nfunk.jep.JEP;
 import org.nfunk.jep.SymbolTable;
-import org.nfunk.jep.Variable;
 
 /**
  * Parse and evaluate mathematical expressions.
  * <p>
- * Usage: <code#e("<i>expression</i>")</code> or
+ * Usage: <code>#e("<i>expression</i>")</code> or
  * <code>#e($var, "<i>expression</i>")</code>
  *
+ * @author Calle Laakkonen
  */
 public class Expression extends Directive {
 
@@ -48,13 +48,14 @@ public class Expression extends Directive {
 		// Load variables
 		SymbolTable symbols = parser.getSymbolTable();
 		for(Object key : symbols.keySet()) {
-			Variable var  = symbols.getVar((String)key);
+            throw new RuntimeException("Code not migrated to use new JEP library yet");
+			/*Variable var  = symbols.getVar((String)key);
 			if(!var.isConstant()) {
 				Object val = ctx.get(var.getName());
 				if(val==null || !(val instanceof Number))
 					throw new ParseErrorException("Variable \"" + var.getName() + "\" is not a number!");
 				var.setValue(val);
-			}
+			}*/
 		}
 		
 		// Print out or save the result

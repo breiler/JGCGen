@@ -5,13 +5,12 @@ import org.luolamies.jgcgen.RenderException;
 import org.luolamies.jgcgen.shapes.Shapes;
 import org.nfunk.jep.JEP;
 import org.nfunk.jep.Node;
-import org.nfunk.jep.ParseException;
 import org.nfunk.jep.SymbolTable;
-import org.nfunk.jep.Variable;
 
 /**
  * A parametric surface
  *
+ * @author Calle Laakkonen
  */
 public class Parametric extends Surface {
 	private final JEP jep;
@@ -39,8 +38,9 @@ public class Parametric extends Surface {
 	public Parametric f(String func, String z0, String z1) {
 		this.z0 = z0;
 		this.z1 = z1;
-		
-		jepnode = jep.parseExpression(func);
+
+		jep.parseExpression(func);
+		jepnode = jep.getTopNode();
 		if(jep.hasError())
 			throw new ParseErrorException(jep.getErrorInfo());
 
@@ -77,11 +77,7 @@ public class Parametric extends Surface {
 	public double getDepthAt(double x, double y) {
 		jep.addVariable("x", x+xoff);
 		jep.addVariable("y", y+yoff);
-		try {
-			return -((Double)jep.evaluate(jepnode) - zmin) * zscale;
-		} catch (ParseException e) {
-			throw new ParseErrorException(e.getMessage());
-		}
+        return -(jep.getValue() - zmin) * zscale;
 	}
 
 	public double getMaxZ() {
@@ -97,35 +93,30 @@ public class Parametric extends Surface {
 		yoff = height / 2;
 
 		// Set dimension constants
-		jep.removeVariable("w"); jep.addConstant("w", width);
-		jep.removeVariable("h"); jep.addConstant("h", height);
-		jep.removeVariable("d"); jep.addConstant("d", depth);
+        jep.addVariable("w", width);
+		jep.addVariable("h", height);
+		jep.addVariable("d", depth);
 		
 		// Evaluate Z scaling expressions
-		Node znode0 = jep.parseExpression(z0);
-		Node znode1 = jep.parseExpression(z1);
-		
+		jep.parseExpression(z0);
+		this.zmin = jep.getValue();
+
+        jep.parseExpression(z1);
+        double z1 = jep.getValue();
+
 		// Set velocity variables
 		SymbolTable symbols = jep.getSymbolTable();
 		for(Object key : symbols.keySet()) {
 			if(!"x".equals(key) && !"y".equals(key)) {
-				Variable var  = symbols.getVar((String)key);
+                throw new RuntimeException("Code not migrated to use new JEP library yet");
+				/*Variable var  = symbols.getVar((String)key);
 				if(!var.isConstant()) {
 					Object val = shapes.ctx.get(var.getName());
 					if(val==null || !(val instanceof Number))
 						throw new ParseErrorException("Variable \"" + var.getName() + "\" is not a number!");
 					var.setValue(val);
-				}
+				}*/
 			}
-		}
-		
-		// Calculate Z scaling		
-		double z1;
-		try {
-			this.zmin = (Double) jep.evaluate(znode0);
-			z1 = (Double) jep.evaluate(znode1);
-		} catch(ParseException e) {
-			throw new RenderException("Couldn't parse function limits!", e);
 		}
 		
 		if(z1==this.zmin)

@@ -22,6 +22,9 @@ import java.util.Properties;
 
 import org.apache.velocity.VelocityContext;
 
+/**
+ * @author Calle Laakkonen
+ */
 public class Configuration {
 	static private Configuration singleton;
 	private Properties props;
@@ -30,7 +33,7 @@ public class Configuration {
 		// Load built-in defaults
 		props = new Properties(); 
 		try {
-			props.load(props.getClass().getResourceAsStream("/config/defaults.properties"));
+			props.load(getClass().getResourceAsStream("/config/defaults.properties"));
 		} catch (IOException e) {
 			System.err.println("Uh oh! Couldn't load built-in properties! " + e.getMessage());
 		}		

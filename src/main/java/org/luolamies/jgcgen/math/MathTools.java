@@ -1,10 +1,27 @@
 package org.luolamies.jgcgen.math;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
 /**
  * A collection of static functions.
  *
+ * @author Calle Laakkonen
  */
 public class MathTools {
+
+    public final static DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = DecimalFormatSymbols.getInstance();
+
+    static {
+        // Makes sure decimal separator is '.' despite locale
+        DECIMAL_FORMAT_SYMBOLS.setDecimalSeparator('.');
+
+        // Make sure minus sign is not a UTF-8 character
+        DECIMAL_FORMAT_SYMBOLS.setMinusSign('-');
+    }
+
+    public final static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.###", DECIMAL_FORMAT_SYMBOLS);
+
 	/**
 	 * An inclusive range from <var>from</var> to <var>to</var>
 	 * @param from starting value
@@ -38,4 +55,8 @@ public class MathTools {
 	static public double number(String str) {
 		return Double.parseDouble(str);
 	}
+
+	static public String format(double value) {
+	    return DECIMAL_FORMAT.format(value);
+    }
 }
