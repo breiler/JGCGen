@@ -1,9 +1,9 @@
 # How to render a template
 html/%.html : %.vm
-	java -jar ../jgcgen.jar $< -o $@
+	java -jar ../target/jgcgen.jar $< -o $@
 
 %.ngc : %.jgc
-	java -jar ../jgcgen.jar -v $< -o $@
+	java -jar ../target/jgcgen.jar -v $< -o $@
 
 # Which templates to render
 VMS=$(wildcard *.vm)
